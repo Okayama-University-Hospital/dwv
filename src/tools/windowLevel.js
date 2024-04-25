@@ -32,6 +32,12 @@ import {App} from '../app/application';
  * ]);
  */
 export class WindowLevel {
+  /**
+   * Mouse move sensitivity.
+   *
+   * @type {Number}
+   */
+  sensitivity = .001;
 
   /**
    * Associated app.
@@ -97,7 +103,7 @@ export class WindowLevel {
     // data range
     const range = viewController.getImageRescaledDataRange();
     // 1/1000 seems to give reasonable results...
-    const pixelToIntensity = (range.max - range.min) * 0.01;
+    const pixelToIntensity = (range.max - range.min) * this.sensitivity;
 
     // calculate new window level
     const center = parseInt(viewController.getWindowLevel().center, 10);
