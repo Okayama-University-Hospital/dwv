@@ -1,4 +1,4 @@
-import {InteractionEventNames, getEventOffset} from '../gui/generic';
+import { InteractionEventNames, getEventOffset } from '../gui/generic';
 
 /**
  * Toolbox controller.
@@ -139,6 +139,7 @@ export class ToolboxController {
       layer.addEventListener(names[i],
         this.#getOnMouch(layer.getId(), names[i]));
     }
+    document.getElementById(layer.getId()).addEventListener('contextmenu', (event) => {event.preventDefault()});
     // update class var
     this.#boundLayers[layerGroupDivId] = layer;
   }
@@ -156,6 +157,7 @@ export class ToolboxController {
       layer.removeEventListener(names[i],
         this.#getOnMouch(layer.getId(), names[i]));
     }
+    document.getElementById(layer.getId()).removeEventListener('contextmenu', (event) => {event.preventDefault()});
   }
 
   /**
@@ -182,10 +184,10 @@ export class ToolboxController {
       }
     };
 
-    const applySelectedTool = (event) => {
+    const applySelectedTool = (event, selectedTool = undefined) => {
       // make sure we have a tool
       if (this.#selectedTool) {
-        const func = this.#selectedTool[event.type];
+        const func = selectedTool === undefined ? this.#selectedTool[event.type] : this.#toolList[selectedTool][event.type];
         if (func) {
           func(event);
         }
@@ -210,7 +212,13 @@ export class ToolboxController {
         // mouse or touch events
         callback = function (event) {
           augmentEventOffsets(event);
-          applySelectedTool(event);
+          if ((event.type === 'mousedown' && event.button === 2) ||
+              (event.type === 'mousemove' && event.buttons === 2)) {
+            // 右クリックの場合はWindowLevelを適用
+            applySelectedTool(event, 'WindowLevel');
+          } else {
+            applySelectedTool(event);
+          }
         };
       }
       // store callback
